@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Función Sigmoidea - Separabilidad No Lineal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .value-display {
+            text-align: center;
+            font-weight: bold;
+            color: #3498db;
+            font-size: 1.1em;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-demo {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .btn-demo:hover {
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            height: 400px;
+        }
+
+        .results {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .data-table th {
+            background: #3498db;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .demo-section {
+            grid-column: 1 / -1;
+            background: #fff3cd;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #ffeaa7;
+            margin-top: 20px;
+        }
+
+        .demo-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .demo-chart-container {
+            height: 300px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Función Sigmoidea</h1>
+            <div class="subtitle">Demostración de Separabilidad No Lineal</div>
+        </header>
+
+        <div class="content">
+            <!-- Panel de Control -->
+            <div class="control-panel">
+                <h2>Configuración de la Sigmoidea</h2>
+                
+                <div class="form-group">
+                    <label for="xShift">Desplazamiento en X (x_shift):</label>
+                    <input type="range" id="xShift" min="-5" max="5" step="0.1" value="0">
+                    <div class="value-display" id="xShiftValue">0.0</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="steepness">Pendiente (steepness):</label>
+                    <input type="range" id="steepness" min="0.1" max="5" step="0.1" value="1">
+                    <div class="value-display" id="steepnessValue">1.0</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="xRangeStart">Inicio del Rango X:</label>
+                    <input type="range" id="xRangeStart" min="-10" max="0" step="0.5" value="-5">
+                    <div class="value-display" id="xRangeStartValue">-5.0</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="xRangeEnd">Fin del Rango X:</label>
+                    <input type="range" id="xRangeEnd" min="0" max="10" step="0.5" value="5">
+                    <div class="value-display" id="xRangeEndValue">5.0</div>
+                </div>
+
+                <button class="btn" onclick="calculateSigmoid()">Calcular Sigmoidea</button>
+                <button class="btn btn-demo" onclick="showNonlinearDemo()">Mostrar Separabilidad No Lineal</button>
+            </div>
+
+            <!-- Gráfico de la Sigmoidea -->
+            <div class="chart-container">
+                <canvas id="sigmoidChart"></canvas>
+            </div>
+
+            <!-- Sección de Demostración No Lineal (oculta inicialmente) -->
+            <div id="demoSection" class="demo-section hidden">
+                <h2>Demostración de Separabilidad No Lineal</h2>
+                <p>Esta demostración muestra cómo una transformación no lineal (radio) combinada con una función sigmoidea puede separar datos que no son linealmente separables.</p>
+                
+                <div class="demo-charts">
+                    <div class="demo-chart-container">
+                        <canvas id="originalDataChart"></canvas>
+                    </div>
+                    <div class="demo-chart-container">
+                        <canvas id="transformationChart"></canvas>
+                    </div>
+                </div>
+                
+                <div id="demoResults" style="margin-top: 15px;"></div>
+                <button class="btn" onclick="hideDemo()">Volver a la Sigmoidea</button>
+            </div>
+
+            <!-- Resultados -->
+            <div class="results">
+                <h2>Datos Calculados</h2>
+                <div id="resultsInfo"></div>
+                <div class="table-container">
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>X</th>
+                                <th>f(X)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% load static %}
+    <script src="{% static 'js/frontend.js' %}"></script>
+</body>
+</html>
+EOF
